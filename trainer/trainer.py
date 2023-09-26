@@ -2,7 +2,27 @@ import numpy as np
 import torch
 from torchvision.utils import make_grid
 from base import BaseTrainer
-from utils import inf_loop, MetricTracker
+from utils import inf_loop, MetricTracker,ensure_checkpoint_exists
+from models.stylegan2.model import Generator,Discriminator
+
+
+def get_stylegan_generator(ckpt_path='pretrained_models/stylegan2-ffhq-config-f.pt'):
+
+    ensure_checkpoint_exists(ckpt_path)
+
+    g_ema = Generator(1024, 512, 8)
+    g_ema.load_state_dict(torch.load(ckpt_path)["g_ema"], strict=False)
+    g_ema.eval()
+    g_ema = g_ema.cuda()
+    mean_latent = g_ema.mean_latent(4096)
+
+    return g_ema, mean_latent
+
+def get_hash_model(dataset, hash_method, backbone,bit):
+    pass
+
+def get_gan_inverter():
+    pass
 
 
 class Trainer(BaseTrainer):
@@ -10,7 +30,7 @@ class Trainer(BaseTrainer):
     Trainer class
     """
     def __init__(self, model, criterion, metric_ftns, optimizer, config, data_loader,
-                 valid_data_loader=None, lr_scheduler=None, len_epoch=None):
+                 valid_data_loader=None, lr_scheduler=None, len_epoch=None, is_pohtoshopped=False):
         super().__init__(model, criterion, metric_ftns, optimizer, config)
         self.config = config
         self.data_loader = data_loader
@@ -25,6 +45,10 @@ class Trainer(BaseTrainer):
         self.do_validation = self.valid_data_loader is not None
         self.lr_scheduler = lr_scheduler
         self.log_step = int(np.sqrt(data_loader.batch_size))
+        self.model=get_hash_model()
+        g_ema, mean_latent = get_stylegan_generator()
+        self.g_ema=g_ema
+        self.mean_latent=mean_latent
 
         self.train_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
         self.valid_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
@@ -36,7 +60,7 @@ class Trainer(BaseTrainer):
         :param epoch: Integer, current training epoch.
         :return: A log that contains average loss and metric in this epoch.
         """
-        self.model.train()
+        self.model.eval()
         self.train_metrics.reset()
         for batch_idx, (data, target) in enumerate(self.data_loader):
             data, target = data.to(self.device), target.to(self.device)
