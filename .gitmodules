@@ -1,0 +1,3 @@
+[submodule "models/GANInverter"]
+	path = models/GANInverter
+	url = https://gitcode.net/sussy_baka/GANInverter.git
