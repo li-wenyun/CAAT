@@ -1,3 +1,6 @@
 [submodule "models/GANInverter"]
 	path = models/GANInverter
 	url = https://github.com/caopulan/GANInverter.git
+[submodule "models/DeepHash-pytorch"]
+	path = models/DeepHash-pytorch
+	url = https://github.com/swuxyj/DeepHash-pytorch.git
