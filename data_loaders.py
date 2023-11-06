@@ -1,63 +1,36 @@
-from torchvision import datasets, transforms
-from base import BaseDataLoader
-from torch.utils.data.dataset import Dataset
 import os
 from PIL import Image
+import torch
+import torch.nn as nn
+import torchvision
+from torchvision import datasets, models, transforms
 
 
 
 
-class CelebADataset(Dataset):
-    def __init__(self, root_dir, transform=None):
-        self.root_dir = root_dir
-        self.transform = transform
+transforms_train = transforms.Compose([
+    transforms.Resize((256, 256)),
+    transforms.RandomHorizontalFlip(), # data augmentation
+    transforms.ToTensor(),
+    transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]) # normalization
+])
 
-    def __len__(self):
-        return len(os.listdir(self.root_dir))
+transforms_test = transforms.Compose([
+    transforms.Resize((256, 256)),
+    transforms.ToTensor(),
+    transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
+])
 
-    def __getitem__(self, idx):
-        img_name = os.path.join(self.root_dir, f"{idx+1:06d}.jpg")
-        image = Image.open(img_name)
-        
-        if self.transform:
-            image = self.transform(image)
-        
-        return image
-
-class LFWDataset(Dataset):
-    def __init__(self, root_dir, transform=None):
-        self.root_dir = root_dir
-        self.transform = transform
-
-    def __len__(self):
-        return len(os.listdir(self.root_dir))
-
-    def __getitem__(self, idx):
-        img_name = os.path.join(self.root_dir, f"{idx+1:06d}.jpg")
-        image = Image.open(img_name)
-        
-        if self.transform:
-            image = self.transform(image)
-        
-        return image
-
-class LFWDataLoader(BaseDataLoader):
-    def __init__(self, data_dir, batch_size, shuffle=True, validation_split=0.0, num_workers=1, training=True):
-        trsfm = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize((0.1307,), (0.3081,))
-        ])
-        self.data_dir = data_dir
-        self.dataset=LFWDataset(self.data_dir,transform=trsfm)
-        super().__init__(self.dataset, batch_size, shuffle, validation_split, num_workers)
-
-
-class CelebDataLoader(BaseDataLoader):
-    def __init__(self, data_dir, batch_size, shuffle=True, validation_split=0.0, num_workers=1, training=True):
-        trsfm = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize((0.1307,), (0.3081,))
-        ])
-        self.data_dir = data_dir
-        self.dataset=CelebADataset(root_dir=self.data_dir,transform=trsfm)
-        super().__init__(self.dataset, batch_size, shuffle, validation_split, num_workers)
+def get_dataloader(config):
+    data_dir =str(config.get('DATA_PATHS', 'data_dir'))
+    data_dir=data_dir+str(config.get('TRAIN_OPTIONS', 'dataset'))+'/'
+    train_dataset = datasets.ImageFolder(os.path.join(data_dir, 'train'), transforms_train)
+    test_dataset = datasets.ImageFolder(os.path.join(data_dir, 'test'), transforms_test)
+    train_dataloader = torch.utils.data.DataLoader(train_dataset,
+                                                   batch_size=int(config.get('TRAIN_OPTIONS', 'batch_size')), 
+                                                   shuffle=True, num_workers=int(config.get('TRAIN_OPTIONS', 'num_workers')))
+    test_dataloader = torch.utils.data.DataLoader(test_dataset,
+                                                  batch_size=int(config.get('TRAIN_OPTIONS', 'batch_size')), 
+                                                  shuffle=False, num_workers=int(config.get('TRAIN_OPTIONS', 'num_workers')))
+    return train_dataloader,test_dataloader,train_dataset,test_dataset
+    
