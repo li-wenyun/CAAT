@@ -23,8 +23,8 @@ pip install -r requirements.txt
 #### Get parameter sensitivity:
 
 ```console
-bash configs/vtab_mae_spt_lora_sensitivity.sh
-bash configs/vtab_mae_spt_adapter_sensitivity.sh
+bash configs/vtab_mae_caat_lora_sensitivity.sh
+bash configs/vtab_mae_caat_adapter_sensitivity.sh
 ```
 
 
@@ -39,8 +39,8 @@ We have provided the following training code:
 
 
 ```console
-bash configs/vtab_supervised_spt_lora.sh
-bash configs/vtab_supervised_spt_adapter.sh
+bash configs/vtab_supervised_caat_lora.sh
+bash configs/vtab_supervised_caat_adapter.sh
 ```
 
 
