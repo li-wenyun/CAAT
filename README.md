@@ -20,11 +20,11 @@ pip install -r requirements.txt
 
 
 
-#### Get parameter sensitivity:
+#### Get parameter criticality:
 
 ```console
-bash configs/vtab_mae_caat_lora_sensitivity.sh
-bash configs/vtab_mae_caat_adapter_sensitivity.sh
+bash configs/vtab_mae_caat_lora_criticality.sh
+bash configs/vtab_mae_caat_adapter_criticality.sh
 ```
 
 
@@ -33,7 +33,7 @@ bash configs/vtab_mae_caat_adapter_sensitivity.sh
 
 
 
-#### PEFT with SPT:
+#### PEFT with CAAT:
 
 We have provided the following training code:
 
